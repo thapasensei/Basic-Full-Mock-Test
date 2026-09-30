@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Thapa Sensei - JFT-Basic A1 Online Preparation Class</title>
+    <!-- Firebase Libraries (v8) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+        
+        rt {
+            font-size: 11.5px !important;
+            font-weight: bold !important;
+            color: #0d47a1 !important;
+        }
+
+        html, body {
+            background-color: #f4f6f9;
+            min-height: 100vh;
+            width: 100%;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 10px;
+        }
+
+        .welcome-card { 
+            background: white; 
+            width: 100%; 
+            max-width: 600px; 
+            border-radius: 12px; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.12); 
+            overflow: hidden; 
+            border: 1px solid #e0e0e0; 
+            margin: auto;
+        }
+        
+        .header { background: linear-gradient(135deg, #0d47a1, #1976d2); color: white; padding: 20px 15px; text-align: center; }
+        .instructor-name { font-size: 26px; font-weight: 900; color: #ffeb3b; text-shadow: 2px 2px 4px rgba(0,0,0,0.4); margin-bottom: 4px; }
+        .class-title { font-size: 16px; font-weight: 700; color: #ffffff; margin-bottom: 8px; }
+        .contact-info { font-size: 13px; background: rgba(255, 255, 255, 0.18); display: inline-block; padding: 5px 14px; border-radius: 20px; font-weight: 500; }
+        
+        .card-body { padding: 20px; }
+        .student-info { background: #f4f8ff; border: 1px solid #bbdefb; border-left: 6px solid #0d47a1; padding: 12px; border-radius: 6px; margin-bottom: 16px; }
+        .info-item { font-size: 13.5px; color: #333; margin-bottom: 4px; }
+        .info-item strong { color: #0d47a1; }
+
+        .name-input-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; text-align: left; }
+        .name-input-group label { font-size: 14px; font-weight: bold; color: #0d47a1; }
+        .name-input-group input { padding: 12px; font-size: 15px; border: 2px solid #90caf9; border-radius: 6px; outline: none; width: 100%; }
+
+        .instructions-title { font-size: 16px; color: #0d47a1; font-weight: 700; margin-bottom: 10px; border-bottom: 2px solid #e0e0e0; padding-bottom: 6px; }
+        
+        .notice-box {
+            background: #fff8e1;
+            border: 1px solid #ffe0b2;
+            border-left: 5px solid #ffa000;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #5d4037;
+            line-height: 1.4;
+        }
+
+        .start-btn { width: 100%; background-color: #2e7d32; color: white; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; text-align: center; }
+        .start-btn:hover { background: #27692b; }
+
+        .set-selector-box { margin-top: 15px; }
+        
+        /* 🚨 NO-UNDERLINE BOX STYLING */
+        .set-link-btn {
+            display: block !important;
+            width: 100% !important;
+            background: #ffffff !important;
+            border: 2px solid #0d47a1 !important;
+            color: #0d47a1 !important;
+            text-decoration: none !important;
+            padding: 14px 20px !important;
+            border-radius: 8px !important;
+            font-size: 16px !important;
+            font-weight: bold !important;
+            margin-bottom: 12px !important;
+            text-align: left !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .set-link-btn:hover { 
+            background: #0d47a1 !important; 
+            color: #ffffff !important; 
+            box-shadow: 0 4px 10px rgba(13, 71, 161, 0.25);
+        }
+
+        .coming-soon-btn {
+            display: block;
+            width: 100%;
+            background: #f1f1f1;
+            border: 2px solid #ccc;
+            color: #777;
+            text-decoration: none;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-align: left;
+            cursor: not-allowed;
+        }
+
+        #loginScreen { display: block; }
+        #adminScreen { display: none; }
+        #landingScreen { display: none; }
+
+        .student-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        .student-table th, .student-table td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 13px; }
+        .student-table th { background: #0d47a1; color: white; }
+        .action-btn-del { background: #d32f2f; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .action-btn-reset { background: #ff9800; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-right: 4px; font-size: 12px; }
+
+        .error-msg { color: #d32f2f; font-size: 13px; margin-top: 8px; font-weight: bold; display: none; text-align: left; }
+    </style>
+</head>
+<body>
+
+    <div class="welcome-card">
+        <div class="header">
+            <div class="instructor-name">Thapa Sensei</div>
+            <div class="class-title">JFT-Basic A1 Online Preparation Class</div>
+            <div class="contact-info">📞 Contact / Viber / WhatsApp: <strong>9867222929</strong></div>
+        </div>
+
+        <!-- 1. STUDENT LOGIN SCREEN -->
+        <div class="card-body" id="loginScreen">
+            <div class="instructions-title" style="margin-top:0;">Student Login (विद्यार्थी लगइन)</div>
+            
+            <div class="notice-box">
+                ⚠️ <strong>Important Notice:</strong> Once you enter your Gmail, it will be bound to this device. Use your personal Gmail account.
+            </div>
+
+            <div class="name-input-group">
+                <label for="studentNameInput">Full Name (विद्यार्थीको नाम):</label>
+                <input type="text" id="studentNameInput" placeholder="Enter full name (e.g., Ram Thapa)...">
+            </div>
+
+            <div class="name-input-group">
+                <label for="studentEmailInput">Gmail Address (जिमेल ठेगाना):</label>
+                <input type="text" id="studentEmailInput" placeholder="Enter your gmail (e.g., ram@gmail.com)...">
+            </div>
+
+            <div id="studentLoginError" class="error-msg"></div>
+
+            <button class="start-btn" style="margin-top: 10px;" onclick="handleManualLogin()">Login & View Sets</button>
+        </div>
+
+        <!-- 2. TEACHER CONTROL PANEL -->
+        <div class="card-body" id="adminScreen">
+            <div class="instructions-title" style="margin-top:0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <span>👨‍🏫 Teacher Control Panel (JFT-Basic A1)</span>
+                <div style="display:flex; gap:8px;">
+                    <button onclick="startTeacherPortal()" style="background:#0288d1; color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">▶️ View Portal</button>
+                    <button onclick="logoutAdmin()" style="background:#d32f2f; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-size:12px;">Logout</button>
+                </div>
+            </div>
+
+            <h4 style="color:#333; margin-bottom:8px; font-size:14px;">📋 List of Logged-in Students (JFT-Basic A1):</h4>
+            <div style="overflow-x:auto;">
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Email Address</th>
+                            <th>Login Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. LANDING SCREEN (SET SELECTION) -->
+        <div class="card-body" id="landingScreen">
+            <div class="student-info">
+                <div class="info-item"><strong>Candidate Name:</strong> <span id="loggedInNameDisplay"></span></div>
+                <div class="info-item"><strong>Email:</strong> <span id="loggedInEmailDisplay"></span></div>
+                <div class="info-item"><strong>Test Level:</strong> JFT-Basic A1 Practice Exams</div>
+            </div>
+
+            <div class="instructions-title">📚 परीक्षा छान्‍नुहोस् (Select Set):</div>
+
+            <div class="set-selector-box">
+                <!-- 💡 SET 1 Button -->
+                <div class="set-link-btn" onclick="navigateToSet('https://thapasensei.github.io/Basic-Mock-Test-Set-1/')">📘 JFT-BASIC A1 - SET 1 ➔</div>
+                
+                <!-- SET 2 Button -->
+                <div class="set-link-btn" onclick="navigateToSet('set2.html')">📗 JFT-BASIC A1 - SET 2 ➔</div>
+
+                <!-- Coming Soon Sets -->
+                <div class="coming-soon-btn">📙 JFT-BASIC A1 - SET 3 (Coming Soon)</div>
+                <div class="coming-soon-btn">📕 JFT-BASIC A1 - SET 4 (Coming Soon)</div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    /* 🔑 FIREBASE CONFIGURATION (JFT-Basic A1) */
+    const firebaseConfig = {
+        apiKey: "AIzaSyB9ANXbKemUW4O6guRCoGLDVmsuOLu28Cg",
+        authDomain: "thapasenseijft.firebaseapp.com",
+        databaseURL: "https://thapasenseijft-default-rtdb.firebaseio.com",
+        projectId: "thapasenseijft",
+        storageBucket: "thapasenseijft.firebasestorage.app",
+        messagingSenderId: "127012464750",
+        appId: "1:127012464750:web:b15d215fae778fc02e1e7f",
+        measurementId: "G-MX88P03WGZ"
+    };
+    
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    const db = firebase.database();
+
+    const TEACHER_ADMIN_NAME = "thapa sensei";
+    const TEACHER_ADMIN_PASS = "1997"; 
+    const DB_JFT_A1_MANUAL = "students_jft_basic_a1_manual"; 
+
+    window.onload = function() {
+        checkAutoLogin();
+    };
+
+    function navigateToSet(pageUrl) {
+        window.location.href = pageUrl;
+    }
+
+    function checkAutoLogin() {
+        const savedEmail = localStorage.getItem('thapa_jft_a1_manual_email');
+        const savedName = localStorage.getItem('thapa_jft_a1_manual_name');
+
+        if (savedEmail && savedName) {
+            const safeKey = savedEmail.replace(/[.@#$\[\]]/g, "_");
+            
+            db.ref(DB_JFT_A1_MANUAL + '/' + safeKey).once('value').then((snapshot) => {
+                const data = snapshot.val();
+                if (data && data.isReset === true) {
+                    localStorage.removeItem('thapa_jft_a1_manual_email');
+                    localStorage.removeItem('thapa_jft_a1_manual_name');
+                    document.getElementById('loginScreen').style.display = 'block';
+                    document.getElementById('landingScreen').style.display = 'none';
+                    alert("🔄 Your device access has been reset by Sensei. Please log in again.");
+                } else {
+                    showLandingScreen(savedName, savedEmail);
+                }
+            });
+        }
+    }
+
+    function handleManualLogin() {
+        const nameInput = document.getElementById('studentNameInput').value.trim();
+        const emailInput = document.getElementById('studentEmailInput').value.trim();
+        const errorBox = document.getElementById('studentLoginError');
+
+        if (!nameInput || !emailInput) {
+            errorBox.style.display = 'block';
+            errorBox.innerHTML = "❌ Please enter both fields!";
+            return;
+        }
+
+        // Check Teacher Login (Name: Thapa Sensei / Password: 1997)
+        if (nameInput.toLowerCase() === TEACHER_ADMIN_NAME && emailInput === TEACHER_ADMIN_PASS) {
+            errorBox.style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminScreen').style.display = 'block';
+            loadAdminStudentTable();
+            return;
+        }
+
+        // Student Gmail Validation
+        if (!emailInput.toLowerCase().endsWith('@gmail.com')) {
+            errorBox.style.display = 'block';
+            errorBox.innerHTML = "❌ Please enter a valid Gmail address (ending with @gmail.com)!";
+            return;
+        }
+
+        const existingEmail = localStorage.getItem('thapa_jft_a1_manual_email');
+
+        if (existingEmail && existingEmail !== emailInput.toLowerCase()) {
+            errorBox.style.display = 'block';
+            errorBox.innerHTML = `⚠️️ This device is already bound to (${existingEmail}). You cannot change it.`;
+            return;
+        }
+
+        const cleanEmail = emailInput.toLowerCase();
+        localStorage.setItem('thapa_jft_a1_manual_email', cleanEmail);
+        localStorage.setItem('thapa_jft_a1_manual_name', nameInput);
+
+        const safeKey = cleanEmail.replace(/[.@#$\[\]]/g, "_");
+        db.ref(DB_JFT_A1_MANUAL + '/' + safeKey).set({
+            name: nameInput,
+            email: cleanEmail,
+            loginDate: new Date().toLocaleString(),
+            isReset: false
+        });
+
+        errorBox.style.display = 'none';
+        showLandingScreen(nameInput, cleanEmail);
+    }
+
+    function showLandingScreen(name, email) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('adminScreen').style.display = 'none';
+        document.getElementById('landingScreen').style.display = 'block';
+        document.getElementById('loggedInNameDisplay').innerText = name;
+        document.getElementById('loggedInEmailDisplay').innerText = email;
+    }
+
+    function startTeacherPortal() {
+        showLandingScreen("Thapa Sensei (Teacher)", "teacher@thapasensei.com");
+    }
+
+    function logoutAdmin() {
+        window.location.href = window.location.pathname;
+    }
+
+    function loadAdminStudentTable() {
+        db.ref(DB_JFT_A1_MANUAL).on('value', (snapshot) => {
+            const tbody = document.getElementById('studentTableBody');
+            tbody.innerHTML = "";
+            const students = snapshot.val();
+            if (!students) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">No students logged in yet.</td></tr>`;
+                return;
+            }
+
+            Object.keys(students).forEach(key => {
+                const stu = students[key];
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${stu.name}</strong></td>
+                        <td><small>${stu.email}</small></td>
+                        <td><small>${stu.loginDate || 'N/A'}</small></td>
+                        <td>
+                            <button class="action-btn-reset" onclick="resetStudentDeviceLock('${key}', '${stu.name}')">Reset Lock</button>
+                            <button class="action-btn-del" onclick="deleteStudent('${key}')">Remove</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        });
+    }
+
+    function resetStudentDeviceLock(key, name) {
+        if (confirm(`Do you want to reset device lock for student: ${name}? They will be able to login with a new Gmail.`)) {
+            db.ref(DB_JFT_A1_MANUAL + '/' + key + '/isReset').set(true, () => {
+                alert(`✅ Access reset for ${name}.`);
+            });
+        }
+    }
+
+    function deleteStudent(key) {
+        if (confirm(`Are you sure you want to remove this student record?`)) {
+            db.ref(DB_JFT_A1_MANUAL + '/' + key).remove();
+        }
+    }
+</script>
+</body>
+</html>
