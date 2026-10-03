@@ -13,18 +13,13 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             margin: 0; 
             padding: 0; 
-            /* Anti-Copy Protection */
             user-select: none; 
             -webkit-user-select: none; 
             -moz-user-select: none;
             -ms-user-select: none;
         }
         
-        rt {
-            font-size: 11.5px !important;
-            font-weight: bold !important;
-            color: #0d47a1 !important;
-        }
+        rt { font-size: 11.5px !important; font-weight: bold !important; color: #0d47a1 !important; }
 
         html, body {
             background-color: #f4f6f9;
@@ -46,6 +41,7 @@
             overflow: hidden; 
             border: 1px solid #e0e0e0; 
             margin: auto;
+            position: relative;
         }
         
         .header { background: linear-gradient(135deg, #0d47a1, #1976d2); color: white; padding: 20px 15px; text-align: center; }
@@ -169,7 +165,7 @@
         <!-- 2. TEACHER CONTROL PANEL -->
         <div class="card-body" id="adminScreen">
             <div class="instructions-title" style="margin-top:0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                <span>👨‍🏫 Teacher Control Panel (JFT-Basic A1)</span>
+                <span>👨‍‍🏫 Teacher Control Panel (JFT-Basic A1)</span>
                 <div style="display:flex; gap:8px;">
                     <button onclick="startTeacherPortal()" style="background:#0288d1; color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">▶️ View Portal</button>
                     <button onclick="logoutAdmin()" style="background:#d32f2f; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-size:12px;">Logout</button>
@@ -204,20 +200,22 @@
 
             <div class="set-selector-box">
                 <!-- SET 1 Button -->
-                <div class="set-link-btn" onclick="navigateToSet('https://thapasensei.github.io/Basic-Mock-Test-Set-1/')">📘 JFT-BASIC A1 - SET 1 ➔</div>
+                <div class="set-link-btn" onclick="navigateToSet('https://github.com/thapasensei/Basic-Mock-Test-Set-1')">📘 JFT-BASIC A1 - SET 1 ➔</div>
                 
                 <!-- SET 2 Button -->
-                <div class="set-link-btn" onclick="navigateToSet('https://thapasensei.github.io/Basic-Mock-Test-Set-2/')">📗 JFT-BASIC A1 - SET 2 ➔</div>
+                <div class="set-link-btn" onclick="navigateToSet('https://github.com/thapasensei/Basic-Mock-Test-Set-2')">📗 JFT-BASIC A1 - SET 2 ➔</div>
+               
+                <!-- SET 2 Button -->
+                <div class="set-link-btn" onclick="navigateToSet('https://github.com/thapasensei/Basic-Mock-Test-Set-3')">📗 JFT-BASIC A1 - SET 3 ➔</div>
 
                 <!-- Coming Soon Sets -->
-                <div class="coming-soon-btn">📙 JFT-BASIC A1 - SET 3 (Coming Soon)</div>
-                <div class="coming-soon-btn">📕 JFT-BASIC A1 - SET 4 (Coming Soon)</div>
+                <div class="coming-soon-btn">📙 JFT-BASIC A1 - SET 4 (Coming Soon)</div>
+                <div class="coming-soon-btn">📕 JFT-BASIC A1 - SET 5 (Coming Soon)</div>
             </div>
         </div>
     </div>
 
 <script>
-    /* 🔑 FIREBASE CONFIGURATION (JFT-Basic A1) */
     const firebaseConfig = {
         apiKey: "AIzaSyB9ANXbKemUW4O6guRCoGLDVmsuOLu28Cg",
         authDomain: "thapasenseijft.firebaseapp.com",
@@ -234,20 +232,13 @@
 
     let isTeacherUser = false;
     const TEACHER_ADMIN_NAME = "thapa sensei";
-    // Encrypted Password Check (1997)
     const TEACHER_ADMIN_HASH = "MTk5Nw=="; 
     const DB_JFT_A1_MANUAL = "students_jft_basic_a1_manual"; 
 
-    // ==========================================
-    // ANTI-THEFT & SECURITY SYSTEM
-    // ==========================================
-
-    // १. Right Click Ban
     document.addEventListener('contextmenu', function(e) {
         if (!isTeacherUser) { e.preventDefault(); }
     });
 
-    // २. Inspect Element & Key Combo Ban
     document.addEventListener('keydown', function(e) {
         if (!isTeacherUser) {
             if (e.key === 'F12' || 
@@ -262,11 +253,15 @@
         checkAutoLogin();
     };
 
-    function navigateToSet(pageUrl) {
-        window.location.href = pageUrl;
+    // 🔗 नाम र इमेल सहित GitHub Link खोल्ने फङ्सन
+    function navigateToSet(baseUrl) {
+        const name = localStorage.getItem('thapa_jft_a1_manual_name') || 'Student';
+        const email = localStorage.getItem('thapa_jft_a1_manual_email') || '';
+        
+        const fullUrl = `${baseUrl}?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`;
+        window.location.href = fullUrl;
     }
 
-    // 🔄 AUTO-LOGIN FIX: पहिले लगइन भइसकेका विद्यार्थीलाई सोझै Landing Page मा लैजाने
     function checkAutoLogin() {
         const savedEmail = localStorage.getItem('thapa_jft_a1_manual_email');
         const savedName = localStorage.getItem('thapa_jft_a1_manual_name');
@@ -283,14 +278,12 @@
                     document.getElementById('landingScreen').style.display = 'none';
                     alert("🔄 Your device access has been reset by Sensei. Please log in again.");
                 } else {
-                    // सिधै परीक्षा रोज्ने Landing Page खोल्ने
                     showLandingScreen(savedName, savedEmail);
                 }
             }).catch(() => {
                 showLandingScreen(savedName, savedEmail);
             });
         } else {
-            // यदि नयाँ विद्यार्थी हो भने लगइन स्क्रिन देखाउने
             document.getElementById('loginScreen').style.display = 'block';
         }
     }
@@ -306,7 +299,6 @@
             return;
         }
 
-        // Check Teacher Login (Name: Thapa Sensei / Password: 1997 Encrypted)
         if (nameInput.toLowerCase() === TEACHER_ADMIN_NAME && btoa(emailInput) === TEACHER_ADMIN_HASH) {
             isTeacherUser = true;
             errorBox.style.display = 'none';
@@ -316,7 +308,6 @@
             return;
         }
 
-        // Student Gmail Validation
         if (!emailInput.toLowerCase().endsWith('@gmail.com')) {
             errorBox.style.display = 'block';
             errorBox.innerHTML = "❌ Please enter a valid Gmail address (ending with @gmail.com)!";
